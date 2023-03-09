@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Table = ({ employees, handleEdit, handleDelete, handleDetail }) => {
   employees.forEach((employee, i) => {
     employee.id = i + 1;
   });
+
+  const [logs, setLogs] = useState([]);
+   useEffect(() => {
+      fetch('https://localhost:7080/api/Vigil/GetChanges')
+         .then((response) => response.json())
+         .then((data) => {
+            console.log(data);
+            setLogs(data);
+         })
+         .catch((err) => {
+            console.log(err.message);
+         });
+   }, []);
 
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -17,29 +30,25 @@ const Table = ({ employees, handleEdit, handleDelete, handleDetail }) => {
         <thead>
           <tr>
             <th>No.</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Salary</th>
-            <th>Date</th>
+            <th>File</th>
+            <th>Modifier</th>
+            <th>Event</th>
             <th colSpan={2} className="text-center">
               Actions
             </th>
           </tr>
         </thead>
         <tbody>
-          {employees.length > 0 ? (
-            employees.map((employee, i) => (
-              <tr key={employee.id}>
-                <td>{i + 1}</td>
-                <td>{employee.firstName}</td>
-                <td>{employee.lastName}</td>
-                <td>{employee.email}</td>
-                <td>{formatter.format(employee.salary)}</td>
-                <td>{employee.date} </td>
+          {logs.length > 0 ? (
+            logs.map((log, i) => (
+              <tr key={log.trackedFileId}>
+                <td>{i +1}</td>
+                <td>{log.trackedFile.filePath}</td>
+                <td>{log.modifier}</td>
+                <td>{log.event}</td>
                 <td className="text-right">
                   <button
-                    onClick={() => handleEdit(employee.id)}
+                    onClick={() => handleEdit(log.id)}
                     className="button muted-button"
                   >
                     Edit
@@ -47,7 +56,7 @@ const Table = ({ employees, handleEdit, handleDelete, handleDetail }) => {
                 </td>
                 <td className="text-right">
                   <button
-                    onClick={() => handleDetail(employee.id)}
+                    onClick={() => handleDetail(log.id)}
                     className="button muted-button"
                   >
                     Detail
@@ -55,7 +64,7 @@ const Table = ({ employees, handleEdit, handleDelete, handleDetail }) => {
                 </td>
                 <td className="text-left">
                   <button
-                    onClick={() => handleDelete(employee.id)}
+                    onClick={() => handleDelete(log.id)}
                     className="button muted-button"
                   >
                     Delete
@@ -65,7 +74,7 @@ const Table = ({ employees, handleEdit, handleDelete, handleDetail }) => {
             ))
           ) : (
             <tr>
-              <td colSpan={7}>No Employees</td>
+              <td colSpan={7}>No Logs</td>
             </tr>
           )}
         </tbody>
